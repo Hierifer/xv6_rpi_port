@@ -7,7 +7,7 @@
 
 # The toolchain to use. arm-none-eabi works, but there does exist 
 # arm-bcm2708-linux-gnueabi.
-#ARMGNU ?= arm-none-eabi
+ARMGNU ?=arm-none-eabi
 
 # The intermediate directory for compiled object files.
 BUILD = build/
@@ -16,7 +16,7 @@ BUILD = build/
 SOURCE = source/
 
 # The name of the output file to generate.
-TARGET = kernel.img
+TARGET = kernel7.img
 
 # The name of the assembler listing file to generate.
 LIST = kernel.list
@@ -31,9 +31,10 @@ LINKER = kernel.ld
 LIBRARIES := csud
 
 #CFLAGS := -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -MD -ggdb -Werror -fno-omit-frame-pointer -nostdinc -nostdlib -fno-stack-protector
-CFLAGS := -fno-pic -static -Wno-packed-bitfield-compat -fno-builtin -fno-strict-aliasing -fshort-wchar -O2 -Wall -MD -ggdb -Werror -fno-omit-frame-pointer -fno-stack-protector -Wa,-march=armv6 -Wa,-mcpu=arm1176jzf-s -I include
+#CFLAGS := -fno-pic -static -Wno-packed-bitfield-compat -fno-builtin -fno-strict-aliasing -fshort-wchar -O2 -Wall -MD -ggdb -Werror -fno-omit-frame-pointer -fno-stack-protector -Wa,-march=armv6 -Wa,-mcpu=arm1176jzf-s -I include
+CFLAGS := -fno-pic -static -Wno-packed-bitfield-compat -fno-builtin -fno-strict-aliasing -fshort-wchar -O2 -Wall -MD -ggdb -Werror -fno-omit-frame-pointer -fno-stack-protector -mfloat-abi=hard -Wa,-march=armv7 -Wa,-mcpu=cortex-a7 -I include
 
-CC := gcc
+CC := $(ARMGNU)-gcc
 
 # The names of all object files that must be generated. Deduced from the 
 # assembly code files in source.
