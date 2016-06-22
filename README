@@ -5,8 +5,14 @@ run on RPi2 if any changes are not made.
 
 At least now, the goal is to pass all tests by 'usertests' command.
 
+
 Thanks,
 Seimei Matsusaki
+
+
+NOTE: I have not finished clearning and uploading all changed files to 
+this repo. I'll finish within this week, so please don't try to execute 
+the code in this repo now. Once finished the work, this note will be deleted.
 
 
 
