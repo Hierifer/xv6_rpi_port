@@ -77,7 +77,7 @@ consolewrite(struct inode *ip, char *buf, int n)
   iunlock(ip);
   acquire(&cons.lock);
   for(i = 0; i < n; i++){
-    //gpuputc(buf[i] & 0xff);
+//    gpuputc(buf[i] & 0xff);
     uartputc(buf[i] & 0xff);
   }
   release(&cons.lock);
@@ -90,12 +90,15 @@ consolewrite(struct inode *ip, char *buf, int n)
 void drawpixel(uint x, uint y)
 {
     u16 *addr;
-
     if(x >= framewidth || y >= frameheight) return;
+    uartputc('M');
     addr = (u16 *) fbinfo.fbp;
+    uartputc('V');
 //    addr = (u16 *) ((FBI *)FrameBufferInfo)->fbp;
     addr += y*1024 + x;
+    uartputc('C');
     *addr = gpucolour;
+    uartputc('E');
     return;
 }
 
@@ -103,10 +106,11 @@ void drawpixel(uint x, uint y)
 void drawcursor(uint x, uint y)
 {
 u8 row, bit;
-
+    uartputc('W');
     for(row=0; row<15; row++)
         for(bit=0; bit<8; bit++)
             drawpixel(x+bit, y+row);
+    uartputc('X');
 }
 
 void drawcharacter(u8 c, uint x, uint y)
@@ -153,26 +157,38 @@ gpuputc(uint c)
 		setgpucolour(0xffff);
 	}
     } else {
+        uartputc('1');
 	setgpucolour(0);
+        uartputc('2');
 	drawcursor(cursor_x, cursor_y);
+        uartputc('3');
 	setgpucolour(0xffff);
+        uartputc('4');
 	if(c!=' ') drawcharacter(c, cursor_x, cursor_y);
 	cursor_x = cursor_x + fontwidth;
+        uartputc('5');
+
 	if(cursor_x >= framewidth) {
 	    cursor_x = 0;
 	    cursor_y += fontheight;
+
+              uartputc('6');
 	    if(cursor_y >= frameheight) {
 		memmove((u8 *)fbinfo.fbp, (u8 *)fbinfo.fbp+framewidth*fontheight*2, (frameheight - fontheight)*framewidth*2);
 		cursor_y = frameheight - fontheight;
 		setgpucolour(0);
+                uartputc('7');
 		while(cursor_x < framewidth) {
 		    drawcursor(cursor_x, cursor_y);
 		    cursor_x = cursor_x + fontwidth;
-		}
+		} 
+                uartputc('8');
 		setgpucolour(0xffff);
 		cursor_x = 0;
 	    }
 	}
+
+        uartputc('9');
     }
 
 }
@@ -202,7 +218,7 @@ printint(int xx, int base, int sign)
     buf[i++] = '-';
 
   while(--i >= 0){
-    //gpuputc(buf[i]);
+  //  gpuputc(buf[i]);
     uartputc(buf[i]);
   }
 }
@@ -227,7 +243,7 @@ cprintf(char *fmt, ...)
   argp = (uint *)(void*)(&fmt + 1);
   for(i = 0; (c = fmt[i] & 0xff) != 0; i++){
     if(c != '%'){
-        //gpuputc(c);
+    //    gpuputc(c);
 	uartputc(c);
       continue;
     }
@@ -246,19 +262,19 @@ cprintf(char *fmt, ...)
       if((s = (char*)*argp++) == 0)
         s = "(null)";
       for(; *s; s++){
-        //gpuputc(*s);
+      //  gpuputc(*s);
 	uartputc(*s);
       }
       break;
     case '%':
-	//gpuputc('%');
+//	gpuputc('%');
 	uartputc('%');
       break;
     default:
       // Print unknown % sequence to draw attention.
-	//gpuputc('%');
+//	gpuputc('%');
 	uartputc('%');
-	//gpuputc(c);
+//	gpuputc(c);
 	uartputc(c);
       break;
     }
@@ -297,13 +313,13 @@ consputc(int c)
   }
 
   if(c == BACKSPACE){
-    //gpuputc('\b'); gpuputc(' '); gpuputc('\b');
+  //  gpuputc('\b'); gpuputc(' '); gpuputc('\b');
     uartputc('\b'); uartputc(' '); uartputc('\b');
   } else if(c == C('D')) {
-    //gpuputc('^'); gpuputc('D');
+  //  gpuputc('^'); gpuputc('D');
     uartputc('^'); uartputc('D');
   } else {
-    //gpuputc(c);
+  //  gpuputc(c);
     uartputc(c);
   }
 }
@@ -394,11 +410,10 @@ void consoleinit(void)
 uint fbinfoaddr;
 
   fbinfoaddr = initframebuf(framewidth, frameheight, framecolors);
-  if(fbinfoaddr != 0)
-  {
-    cprintf("fbinfoaddr != 0 (consoleinit)\n");
-    while(1);
-  }
+  ///if(fbinfoaddr != 0) NotOkLoop();
+
+  if(fbinfoaddr != 0) { uartputc('N'); while(1); }
+  else uartputc('Y');
 
   initlock(&cons.lock, "console");
   memset(&input, 0, sizeof(input));

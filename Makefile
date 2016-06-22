@@ -30,6 +30,8 @@ LINKER = kernel.ld
 # The names of libraries to use.
 LIBRARIES := csud
 
+#CFLAGS := -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -MD -ggdb -Werror -fno-omit-frame-pointer -nostdinc -nostdlib -fno-stack-protector
+#CFLAGS := -fno-pic -static -Wno-packed-bitfield-compat -fno-builtin -fno-strict-aliasing -fshort-wchar -O2 -Wall -MD -ggdb -Werror -fno-omit-frame-pointer -fno-stack-protector -Wa,-march=armv6 -Wa,-mcpu=arm1176jzf-s -I include
 CFLAGS := -fno-pic -static -Wno-packed-bitfield-compat -fno-builtin -fno-strict-aliasing -fshort-wchar -O2 -Wall -MD -ggdb -Werror -fno-omit-frame-pointer -fno-stack-protector -mfloat-abi=hard -Wa,-march=armv7 -Wa,-mcpu=cortex-a7 -I include
 
 CC := $(ARMGNU)-gcc

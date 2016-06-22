@@ -18,10 +18,60 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-
+//#include <uspienv/synchronize.h>
 #include <types.h>
+//#include <uspienv/assert.h>
+
 #include "synchronize.h"
 
+
+/*
+static volatile unsigned s_nCriticalLevel = 0;
+static volatile boolean s_bWereEnabled;
+
+void EnterCritical (void)
+{
+	u32 nFlags;
+	__asm volatile ("mrs %0, cpsr" : "=r" (nFlags));
+
+	DisableInterrupts ();
+
+	if (s_nCriticalLevel++ == 0)
+	{
+		s_bWereEnabled = nFlags & 0x80 ? FALSE : TRUE;
+	}
+
+	arm_dmb();
+}
+
+void LeaveCritical (void)
+{
+	arm_dmb();
+
+	//assert (s_nCriticalLevel > 0);
+	if (--s_nCriticalLevel == 0)
+	{
+		if (s_bWereEnabled)
+		{
+			EnableInterrupts ();
+		}
+	}
+}
+*/
+
+//#if RASPPI != 1
+
+//
+// Cache maintenance operations for ARMv7-A
+//
+// See: ARMv7-A Architecture Reference Manual, Section B4.2.1
+//
+// NOTE: The following functions should hold all variables in CPU registers. Currently this will be
+//	 ensured using the register keyword and maximum optimation (see uspienv/synchronize.h).
+//
+//	 The following numbers can be determined (dynamically) using CTR, CSSELR, CCSIDR and CLIDR.
+//	 As long we use the Cortex-A7 implementation in the BCM2836 these static values will work:
+//
 
 #define SETWAY_LEVEL_SHIFT           1
 

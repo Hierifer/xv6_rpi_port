@@ -67,10 +67,10 @@ void tvinit(void)
 	 * writeback and invalidate data cache
 	 * invalidate instruction cache
 	 */
-	
-	CleanDataCache();
-	invalidateDataCache();
+        CleanDataCache();
+        InvalidateDataCache();
 	dsb_barrier();
+	//flush_idcache();
 	ptr = kalloc();
 	memset(ptr, 0, PGSIZE);
 	set_mode_sp(ptr+4096, 0xD1);/* fiq mode, fiq and irq are disabled */

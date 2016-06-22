@@ -20,6 +20,52 @@
 #ifndef _uspi_synchronize_h
 #define _uspi_synchronize_h
 
+//#include <uspi/macros.h>
+//#include <uspi/types.h>
+
+//#include <types.h>
+
+/*
+#ifdef __cplusplus
+extern "C" {
+#endif
+*/
+
+//
+// Interrupt synchronization
+//
+
+/*
+void uspi_EnterCritical (void);		// disable interrupts (nested calls possible)
+void uspi_LeaveCritical (void);		// enable interrupts (nested calls possible)
+
+
+#if RASPPI == 1
+
+//
+// Cache control
+//
+#define InvalidateInstructionCache()	\
+				__asm volatile ("mcr p15, 0, %0, c7, c5,  0" : : "r" (0) : "memory")
+#define FlushPrefetchBuffer()	__asm volatile ("mcr p15, 0, %0, c7, c5,  4" : : "r" (0) : "memory")
+#define FlushBranchTargetCache()	\
+				__asm volatile ("mcr p15, 0, %0, c7, c5,  6" : : "r" (0) : "memory")
+#define InvalidateDataCache()	__asm volatile ("mcr p15, 0, %0, c7, c6,  0" : : "r" (0) : "memory")
+#define CleanDataCache()	__asm volatile ("mcr p15, 0, %0, c7, c10, 0" : : "r" (0) : "memory")
+
+//
+// Barriers
+//
+#define DataSyncBarrier()	__asm volatile ("mcr p15, 0, %0, c7, c10, 4" : : "r" (0) : "memory")
+#define DataMemBarrier() 	__asm volatile ("mcr p15, 0, %0, c7, c10, 5" : : "r" (0) : "memory")
+
+#define InstructionSyncBarrier() FlushPrefetchBuffer()
+#define InstructionMemBarrier()	FlushPrefetchBuffer()
+
+#else
+*/
+
+
 //
 // Cache control
 //
@@ -33,6 +79,8 @@
 void InvalidateDataCache(void);
 void CleanDataCache(void);
 
+//void uspi_CleanAndInvalidateDataCacheRange (u32 nAddress, u32 nLength) MAXOPT;
+
 //
 // Barriers
 //
@@ -40,6 +88,16 @@ void CleanDataCache(void);
 #define DataMemBarrier() 	__asm volatile ("dmb" ::: "memory")
 #define InstructionSyncBarrier() __asm volatile ("isb" ::: "memory")
 #define InstructionMemBarrier()	__asm volatile ("isb" ::: "memory")
+
+
+//#endif
+
 #define CompilerBarrier()	__asm volatile ("" ::: "memory")
+
+/*
+#ifdef __cplusplus
+}
+#endif
+*/
 
 #endif

@@ -9,20 +9,23 @@ SECTIONS {
         /* Link the kernel at this address: "." means the current address */
         /* Must be equal to KERNLINK */
         . = 0x80008000;
-
+       
 
 	/*
 	* First and formost we need the .init section, containing the code to 
         * be run first. We allow room for the ATAGs and stack and conform to 
         * the bootloader's expectation by putting this code at 0x8000.
 	*/
-	.init 0x80008000 : AT(0x8000) {
-		*(.init)
+	 .init 0x80008000 : AT(0x8000) {
+          *(.init)
 	}
+       
 	
 	/* 
 	* Next we put the rest of the code.
 	*/
+                
+   
 	.text : {
 		*.c.o(.text)
 		*(.text .stub .text.*)

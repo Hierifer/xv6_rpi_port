@@ -272,7 +272,7 @@ void
 scheduler(void)
 {
   struct proc *p;
-
+//  cprintf("Before the scheduler loop\n");
   for(;;){
     // Enable interrupts on this processor.
     //cprintf("before enabling interrupts\n");
@@ -295,8 +295,9 @@ scheduler(void)
 //cprintf("after switching page table\n");
 
       swtch(&curr_cpu->scheduler, curr_proc->context);
-
+  //    cprintf("after swtch()\n");
       switchkvm();
+    //  cprintf("after switchkvm()\n");
 
       // Process is done running for now.
       // It should have changed its p->state before coming back.

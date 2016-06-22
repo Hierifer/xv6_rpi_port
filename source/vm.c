@@ -16,6 +16,8 @@
 #include "proc.h"
 #include "elf.h"
 
+#include "synchronize.h"
+
 extern char data[];  // defined by kernel.ld
 extern char end[];  // defined by kernel.ld
 
@@ -42,7 +44,7 @@ walkpgdir(pde_t *pgdir, const void *va, uint l1attr, int alloc)
     // be further restricted by the permissions in the page table 
     // entries, if necessary.
     *pde = v2p(pgtab) | l1attr;
-//cprintf("the pde value is %x\n", (uint)*pde);
+ // cprintf("the pde value is %x\n", (uint)*pde);
   }
   return &pgtab[PTX(va)];
 }
@@ -59,25 +61,25 @@ mappages(pde_t *pgdir, void *va, uint size, uint pa, uint l1attr, uint l2attr)
   a = (char*)PGROUNDDOWN((uint)va);
   last = (char*)PGROUNDDOWN(((uint)va) + size - 1);
 
-//cprintf("size= %x a=%x last= %x pa=%x\n", size, a, last, pa);
+ // cprintf("size= %x a=%x last= %x pa=%x\n", size, a, last, pa);
 
   if((SECTION & l1attr) != 0){// for 1 MB pages
 	for(;;){
 	    if(a > last) break;
 	    if((uint)pgdir[PDX(a)] != 0) panic("remap");
 	    pgdir[PDX(a)] = pa | l1attr;
-//cprintf("The pgdir entry: %x value: %x a=%x last= %x\n", PDX(a), pgdir[PDX(a)], a, last);
+  //cprintf("The pgdir entry: %x value: %x a=%x last= %x\n", PDX(a), pgdir[PDX(a)], a, last);
 	    a += MBYTE;
 	    pa += MBYTE;
 	}
   } else if((COARSE & l1attr) != 0){// for 4kB pages
 	for(;;){
-	//cprintf("The pgdir is %x value: %x a=%x last= %x\n", pgdir+PDX(a), pgdir[PDX(a)], a, last);
+//	 cprintf("The pgdir is %x value: %x a=%x last= %x\n", pgdir+PDX(a), pgdir[PDX(a)], a, last);
 	    if((pte = walkpgdir(pgdir, a, l1attr, 1)) == 0)
 		return -1;
 	    if((uint)*pte != 0) panic("remap");
 	    *pte = pa | l2attr;
-//cprintf("The pte value is %x, the pde values is %x\n", (uint)*pte, pgdir[PDX(a)]);
+ //cprintf("The pte value is %x, the pde values is %x\n", (uint)*pte, pgdir[PDX(a)]);
 	    if(a == last) break;
 	    a += PGSIZE;
 	    pa += PGSIZE;
@@ -132,9 +134,9 @@ setupkvm(void)
 
   if((pgdir = (pde_t*)kalloc()) == 0)
     return 0;
-//cprintf("inside setupkvm: pgdir=%x\n", pgdir);
+  //cprintf("inside setupkvm: pgdir=%x\n", pgdir);
   memset(pgdir, 0, PGSIZE);
-//cprintf("after memset\n", pgdir);
+  //cprintf("after memset\n", pgdir);
   return pgdir;
 }
 
@@ -181,8 +183,10 @@ switchkvm(void)
 void
 switchkvm_new(void)
 {
+  CleanDataCache();
+  InvalidateDataCache();
   dsb_barrier();
-  flush_idcache();
+  ///flush_idcache();
   //cprintf("The phy pgtbase address is %x\n", (uint)v2p(kpgdir));
   set_pgtbase((uint)v2p(kpgdir));   // switch to the kernel page table
   //cprintf("after set_pgtbase\n");
@@ -196,12 +200,16 @@ void
 switchuvm(struct proc *p)
 {
   pushcli();
+  //cprintf("after puchcli()\n");
   //cpu->ts.esp0 = (uint)proc->kstack + KSTACKSIZE;
   if(p->pgdir == 0)
     panic("switchuvm: no pgdir");
-//cprintf("before copying uvm to kvm kpgdir=%x the first entry: %x\n", kpgdir, kpgdir[0]);
+  //cprintf("before copying uvm to kvm kpgdir=%x the first entry: %x\n", kpgdir, kpgdir[0]);
   memmove((void *)kpgdir, (void *)p->pgdir, PGSIZE);  // switch to new user address space
-  flush_idcache();
+  //flush_idcache();
+  CleanDataCache();
+  InvalidateDataCache();
+  dsb_barrier();
   flush_tlb();
   popcli();
 }
@@ -266,7 +274,7 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
   for(; a < newsz; a += PGSIZE){
     mem = kalloc();
     if(mem == 0){
-      cprintf("allocuvm out of memory\n");
+    //  cprintf("allocuvm out of memory\n");
       deallocuvm(pgdir, newsz, oldsz);
       return 0;
     }

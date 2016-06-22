@@ -88,9 +88,11 @@ writemailbox(uint *addr, u8 channel)
 	x = a & 0xfffffff0;
 	y = x | (uint)(channel & 0xf);
 
-	CleanDataCache();
-    InvalidateDataCache();
-    dsb_barrier();
+	//flush_dcache_all();
+        CleanDataCache();
+        InvalidateDataCache();
+        dsb_barrier();
+        
 
 	while ((inw(MAILBOX_BASE+24) & 0x80000000) != 0);
 	outw(MAILBOX_BASE+32, y);
