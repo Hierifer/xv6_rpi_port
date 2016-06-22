@@ -1,3 +1,22 @@
+This repo is based on xv6_rpi_port kernel, which is a ported version of xv6.
+The kernel works on Raspberry Pi, but Pi 2 because of differences such as hardware 
+components or different architectual version. The purpose of this repo is to modify 
+the kernel, so make it runnable on RPi2. The goal is to pass all test cases by 
+"usertests" command.
+
+Currently, the OS can run on RPi2, but cannot pass all test cases.
+
+
+
+Thanks,
+
+Seimei Matsusaki
+
+
+The following is from the original README file.
+
+---------------
+
 xv6_rpi_port is based on MIT xv6 (http://pdos.csail.mit.edu/6.828/2012/v6.html).
 It is ported from x86 to armv6 in Raspberry Pi (RPI). The rpi port follows
 the coding style of xv6 as much as possible to hide the architectural
