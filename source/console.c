@@ -77,7 +77,7 @@ consolewrite(struct inode *ip, char *buf, int n)
   iunlock(ip);
   acquire(&cons.lock);
   for(i = 0; i < n; i++){
-    gpuputc(buf[i] & 0xff);
+    //gpuputc(buf[i] & 0xff);
     uartputc(buf[i] & 0xff);
   }
   release(&cons.lock);
@@ -202,7 +202,7 @@ printint(int xx, int base, int sign)
     buf[i++] = '-';
 
   while(--i >= 0){
-    gpuputc(buf[i]);
+    //gpuputc(buf[i]);
     uartputc(buf[i]);
   }
 }
@@ -227,7 +227,7 @@ cprintf(char *fmt, ...)
   argp = (uint *)(void*)(&fmt + 1);
   for(i = 0; (c = fmt[i] & 0xff) != 0; i++){
     if(c != '%'){
-        gpuputc(c);
+        //gpuputc(c);
 	uartputc(c);
       continue;
     }
@@ -246,19 +246,19 @@ cprintf(char *fmt, ...)
       if((s = (char*)*argp++) == 0)
         s = "(null)";
       for(; *s; s++){
-        gpuputc(*s);
+        //gpuputc(*s);
 	uartputc(*s);
       }
       break;
     case '%':
-	gpuputc('%');
+	//gpuputc('%');
 	uartputc('%');
       break;
     default:
       // Print unknown % sequence to draw attention.
-	gpuputc('%');
+	//gpuputc('%');
 	uartputc('%');
-	gpuputc(c);
+	//gpuputc(c);
 	uartputc(c);
       break;
     }
@@ -297,13 +297,13 @@ consputc(int c)
   }
 
   if(c == BACKSPACE){
-    gpuputc('\b'); gpuputc(' '); gpuputc('\b');
+    //gpuputc('\b'); gpuputc(' '); gpuputc('\b');
     uartputc('\b'); uartputc(' '); uartputc('\b');
   } else if(c == C('D')) {
-    gpuputc('^'); gpuputc('D');
+    //gpuputc('^'); gpuputc('D');
     uartputc('^'); uartputc('D');
   } else {
-    gpuputc(c);
+    //gpuputc(c);
     uartputc(c);
   }
 }
@@ -394,7 +394,11 @@ void consoleinit(void)
 uint fbinfoaddr;
 
   fbinfoaddr = initframebuf(framewidth, frameheight, framecolors);
-  if(fbinfoaddr != 0) NotOkLoop();
+  if(fbinfoaddr != 0)
+  {
+    cprintf("fbinfoaddr != 0 (consoleinit)\n");
+    while(1);
+  }
 
   initlock(&cons.lock, "console");
   memset(&input, 0, sizeof(input));

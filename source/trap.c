@@ -15,6 +15,7 @@
 #include "arm.h"
 #include "traps.h"
 #include "spinlock.h"
+#include "synchronize.h"
 
 extern u8 *vectors;
 
@@ -66,8 +67,10 @@ void tvinit(void)
 	 * writeback and invalidate data cache
 	 * invalidate instruction cache
 	 */
+	
+	CleanDataCache();
+	invalidateDataCache();
 	dsb_barrier();
-	flush_idcache();
 	ptr = kalloc();
 	memset(ptr, 0, PGSIZE);
 	set_mode_sp(ptr+4096, 0xD1);/* fiq mode, fiq and irq are disabled */
