@@ -3,13 +3,15 @@ The kernel works on Raspberry Pi but Pi 2, because of differences between RPi ad
 such as hardware components. The purpose of this repo is to modify the kernel, so make 
 it runnable on RPi2. The goal is to pass all test cases by "usertests" command.
 
-Currently, the OS can run on RPi2, but cannot pass all test cases yet.
+The current progress is, the modified OS can run on RPi2, but cannot pass all test cases yet.
+Any improvements or poiting out my initialization mistakes would be welcomed.
 
 
+Thanks, 
 
-Thanks,
 
-Seimei Matsusaki
+Seimei Matsusaki 
+(smatsusaki@dons.usfca.edu)
 
 
 The following is from the original README file.
