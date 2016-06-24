@@ -1,14 +1,14 @@
 This repo is based on xv6_rpi_port kernel, which is a ported version of xv6.
 The kernel works on Raspberry Pi but Pi 2, because of differences between RPi ad RPi2 
-such as hardware components. The purpose of this repo is to modify the kernel, so make 
+such as hardware components. The purpose of this repo is to modify the kernel, and make 
 it runnable on RPi2. The goal is to pass all test cases by "usertests" command.
 
 The current progress is that the modified OS can run on RPi2, but cannot pass all test cases yet.
-What part are mainly modified are listed as follows:
+The following shows what part is mainly modified:
 
 1. Initialization code for the MMU (entry.s, mmu.c)
-2. Base address for I/O (0x2000000 to 0x3f000000)
-3. Memory barrier and cache maitenance operations (e.g. vm.c, entry.s, or mailbox.c)
+2. Base address for I/O (from 0x2000000 to 0x3f000000)
+3. Memory barriers and cache maitenance operations (e.g. vm.c, entry.s, or mailbox.c)
 
 and also, synchronize.c/h are added to use the maintenance operations
 
