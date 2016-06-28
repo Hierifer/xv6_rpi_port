@@ -8,7 +8,7 @@ The following shows what part is mainly modified:
 
 1. Initialization code for the MMU (entry.s, mmu.c)
 2. Base address for I/O (from 0x2000000 to 0x3f000000)
-3. Memory barriers and cache maitenance operations (e.g. vm.c, entry.s, or mailbox.c)
+3. Memory barriers and cache maitenance operations in some files (e.g. vm.c, entry.s, or mailbox.c)
 
 and also, synchronize.c/h are added to use the maintenance operations
 
