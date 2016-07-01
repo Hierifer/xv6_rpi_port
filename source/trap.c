@@ -22,6 +22,7 @@ extern u8 *vectors;
 void cprintf(char*, ...);
 void dsb_barrier(void);
 void flush_idcache(void);
+void flush_icache(void);
 void *memmove(void *dst, const void *src, uint n);
 void set_mode_sp(char *, uint);
 
@@ -67,10 +68,14 @@ void tvinit(void)
 	 * writeback and invalidate data cache
 	 * invalidate instruction cache
 	 */
-        CleanDataCache();
-        InvalidateDataCache();
+
+  CleanDataCache();
+  InvalidateDataCache();
+  flush_icache();
 	dsb_barrier();
-	//flush_idcache();
+
+	//flush_idcache(); 
+
 	ptr = kalloc();
 	memset(ptr, 0, PGSIZE);
 	set_mode_sp(ptr+4096, 0xD1);/* fiq mode, fiq and irq are disabled */

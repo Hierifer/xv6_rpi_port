@@ -23,6 +23,8 @@ extern char end[];  // defined by kernel.ld
 
 pde_t *kpgdir;  // for use in scheduler()
 
+void flush_icache(void); //Used as a support function instead of flush_idcache()
+
 // Return the address of the PTE in page table pgdir
 // that corresponds to virtual address va.  If alloc!=0,
 // create any required page table pages.
@@ -185,8 +187,10 @@ switchkvm_new(void)
 {
   CleanDataCache();
   InvalidateDataCache();
+  flush_icache();
   dsb_barrier();
   ///flush_idcache();
+
   //cprintf("The phy pgtbase address is %x\n", (uint)v2p(kpgdir));
   set_pgtbase((uint)v2p(kpgdir));   // switch to the kernel page table
   //cprintf("after set_pgtbase\n");
@@ -206,9 +210,12 @@ switchuvm(struct proc *p)
     panic("switchuvm: no pgdir");
   //cprintf("before copying uvm to kvm kpgdir=%x the first entry: %x\n", kpgdir, kpgdir[0]);
   memmove((void *)kpgdir, (void *)p->pgdir, PGSIZE);  // switch to new user address space
+
   //flush_idcache();
+  
   CleanDataCache();
   InvalidateDataCache();
+  flush_icache();
   dsb_barrier();
   flush_tlb();
   popcli();

@@ -53,6 +53,15 @@ mov r8, #0
 // store multiple at r4.
 stmia r4!, {r5-r8}
 
+
+/* The majority of the following code comes from "Migrating a software application
+   from ARMv5 to ARMv7-A/R", Section 4.1.1. A Document URL is as follows:
+
+   http://infocenter.arm.com/help/topic/com.arm.doc.dai0425/
+        DAI0425_migrating_an_application_from_ARMv5_to_ARMv7_AR.pdf 
+*/
+
+// =========== START =========== //
 //Disable MMU
 mrc p15, 0, r1, c1, c0, 0
 bic r1, r1, #0x1
@@ -92,7 +101,6 @@ set_loop:
 //Invalidate TLB
 mcr p15, 0, r1, c8, c7, 0
 
-
 //Branch Prediction Enable
 mov r1, #0
 mrc p15, 0, r1, c1, c0, 0
@@ -107,6 +115,7 @@ mcr p15, 0, r1, c1, c0, 1
 dsb
 isb
  
+//Jump to mmuinit0 in mmu.c
 bl mmuinit0       
 
 //Initialize MMU
@@ -122,11 +131,14 @@ mcr p15, 0, r1, c2, c0, 0
 //Enable MMU 
 mrc p15, 0, r1, c1, c0, 0
 orr r1, r1, #0x1
-orr r1, #0x00002000     //Tell the vector table at higher place
+orr r1, #0x00002000     //Vector table at high memory
 orr r1, #0x00000004     //Data Cache Enable
 orr r1, #0x00001000     //Instruction Cache Enable
 mcr p15, 0, r1, c1, c0, 0
+
+// =========== END =========== //
        
+
 
 /* switch SP and PC into KZERO space */
 mov r1, sp
@@ -164,6 +176,13 @@ flush_idcache:
 	mov r0, #0
 	mcr p15, 0, r0, c7, c5, 0 /* invalidate i-cache */
 	bx lr
+	
+.global flush_icache /* This is not a builtin function */
+flush_icache:
+	mov r0, #0
+	mcr p15, 0, r0, c7, c5, 0
+	bx lr
+
 .global flush_tlb
 flush_tlb:
 	mov r0, #0
