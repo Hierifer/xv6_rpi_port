@@ -23,24 +23,24 @@ void mmuinit0(void)
     l1 = (pde_t *) K_PDX_BASE;
     l2 = (pte_t *) K_PTX_BASE;
 
-        // map all of ram at KERNBASE
+    //map all of ram at KERNBASE
     va = KERNBASE;
     for(pa = PA_START; pa < PA_START+RAMSIZE; pa += MBYTE){
-                l1[PDX(va)] = pa|DOMAIN0|PDX_AP(K_RW)|SECTION|CACHED|BUFFERED;
-                va += MBYTE;
+        l1[PDX(va)] = pa|DOMAIN0|PDX_AP(K_RW)|SECTION|CACHED|BUFFERED;
+            va += MBYTE;
         }
 
-        // identity map first MB of ram so mmu can be enabled
-        l1[PDX(PA_START)] = PA_START|DOMAIN0|PDX_AP(K_RW)|SECTION|CACHED|BUFFERED;
+    // identity map first MB of ram so mmu can be enabled
+    l1[PDX(PA_START)] = PA_START|DOMAIN0|PDX_AP(K_RW)|SECTION|CACHED|BUFFERED;
 
-        // map IO region
-        va = DEVSPACE;
-        for(pa = PHYSIO; pa < PHYSIO+IOSIZE; pa += MBYTE){
-                l1[PDX(va)] = pa|DOMAIN0|PDX_AP(K_RW)|SECTION;
-                va += MBYTE;
-        }
+    // map IO region
+    va = DEVSPACE;
+    for(pa = PHYSIO; pa < PHYSIO+IOSIZE; pa += MBYTE){
+        l1[PDX(va)] = pa|DOMAIN0|PDX_AP(K_RW)|SECTION;
+        va += MBYTE;
+    }
 
-	// map GPU memory
+    // map GPU memory
     va = GPUMEMBASE;
     for(pa = GPUMEMBASE; pa < (uint)GPUMEMBASE+(uint)GPUMEMSIZE; pa += MBYTE){
         l1[PDX(va)] = pa|DOMAIN0|PDX_AP(K_RW)|SECTION;
@@ -57,24 +57,29 @@ void
 mmuinit1(void)
 {
     pde_t *l1;
-    //uint va1, va2;
+    uint va1, va2;
 
     l1 = (pde_t*)(K_PDX_BASE);
 
     // undo identity map of first MB of ram
     l1[PDX(PA_START)] = 0;
 
-    dsb_barrier(); 
-    // drain write buffer; writeback data cache range [va, va+n]
-    /*	
+
+    // drain write buffer; writeback data cache range [va, va+n]	
     va1 = (uint)&l1[PDX(PA_START)];
     va2 = va1 + sizeof(pde_t);
     va1 = va1 & ~((uint)CACHELINESIZE-1);
     va2 = va2 & ~((uint)CACHELINESIZE-1);
-    flush_dcache(va1, va2);
-    */
+    //flush_dcache(va1, va2);
+    CleanAndInvalidateDataCacheRange(va1, va2 - va1);
+    
+
+    /* Previous attempt (clean and invalidate all cache lines)
     CleanDataCache();
     InvalidateDataCache();
+    */
+
+    dsb_barrier(); 
     
 
     // invalidate TLB; DSB barrier used

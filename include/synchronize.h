@@ -78,6 +78,9 @@ void uspi_LeaveCritical (void);		// enable interrupts (nested calls possible)
 
 void InvalidateDataCache(void);
 void CleanDataCache(void);
+void InvalidateDataCacheRange (u32, u32);
+void CleanDataCacheRange (u32, u32);
+void CleanAndInvalidateDataCacheRange (u32, u32);
 
 //void uspi_CleanAndInvalidateDataCacheRange (u32 nAddress, u32 nLength) MAXOPT;
 

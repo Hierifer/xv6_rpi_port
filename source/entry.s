@@ -125,7 +125,7 @@ ldr r1, =0x4000
 mcr p15, 0, r1, c2, c0, 0
 
 //Set domain access control register
-//ldr r1, =0x55555555
+//ldr r1, =0x1
 //mcr p15, 0, r1, c3, c0, 0
 
 //Enable MMU 
@@ -176,7 +176,7 @@ flush_idcache:
 	mov r0, #0
 	mcr p15, 0, r0, c7, c5, 0 /* invalidate i-cache */
 	bx lr
-	
+
 .global flush_icache /* This is not a builtin function */
 flush_icache:
 	mov r0, #0
