@@ -126,10 +126,7 @@ ldr r1, =0x4000           //0x4000 == ttb address
 mcr p15, 0, r1, c2, c0, 0 //Write Translation Table Base Register 0
 
 /* Set domain access control register */
-mrc p15, 0, r1, c3, c0, 0 //Read Domain Access Control Register
-//bic r1, r1, #0x3
-//orr r1, r1, #0x1
-ldr r1,=0xffffffff
+ldr r1,=0xffffffff        //Full Access to all domains (should be fixed later)
 mcr p15, 0, r1, c3, c0, 0 //Write Domain Access Control Register
 
 
