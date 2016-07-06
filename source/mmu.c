@@ -17,7 +17,6 @@ void mmuinit0(void)
     pte_t *l2;
     uint pa, va, *p;
 
-
     for(p=(uint *)0x2000; p<(uint *)0x8000; p++) *p = 0;
 
     l1 = (pde_t *) K_PDX_BASE;
@@ -78,9 +77,6 @@ mmuinit1(void)
     CleanDataCache();
     InvalidateDataCache();
     */
-
-    dsb_barrier(); 
-    
 
     // invalidate TLB; DSB barrier used
     flush_tlb();

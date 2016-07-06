@@ -58,83 +58,88 @@ stmia r4!, {r5-r8}
    from ARMv5 to ARMv7-A/R", Section 4.1.1. A Document URL is as follows:
 
    http://infocenter.arm.com/help/topic/com.arm.doc.dai0425/
-        DAI0425_migrating_an_application_from_ARMv5_to_ARMv7_AR.pdf 
-*/
+        DAI0425_migrating_an_application_from_ARMv5_to_ARMv7_AR.pdf  */
 
 // =========== START =========== //
-//Disable MMU
-mrc p15, 0, r1, c1, c0, 0
+
+/* Disable MMU */
+mrc p15, 0, r1, c1, c0, 0 //Read Control Register configuration data
 bic r1, r1, #0x1
-mcr p15, 0, r1, c1, c0, 0
+mcr p15, 0, r1, c1, c0, 0 //Write Control Register configuration data
 
-//Disable L1 Caches
-mrc p15, 0, r1, c1, c0, 0
-bic r1, r1, #(0x1 << 12)
-bic r1, r1, #(0x1 << 2)
-mcr p15, 0, r1, c1, c0, 0	
+/* Disable L1 Caches */
+mrc p15, 0, r1, c1, c0, 0 //Read Control Register configuration data
+bic r1, r1, #(0x1 << 12)  //Disable Instruction Cache
+bic r1, r1, #(0x1 << 2)   //Disable Data Cache
+mcr p15, 0, r1, c1, c0, 0 //Write Control Register configuration data
 
-//Invalidate L1 & Instruction cache
-mov r1, #0
-mcr p15, 0, r1, c7, c5, 0
+/* Invalidate L1 and Instruction cache */
+mov r1, #0                
+mcr p15, 0, r1, c7, c5, 0 
 
-//Invalidate Data cache
-mrc p15, 1, r0, c0, c0, 0
+/* Invalidate Data cache 
+   To make the code general purpose, calculate the cache size first,
+   and loop through each set + way */
+mrc p15, 1, r0, c0, c0, 0 //Read cache size ID
 ldr r3,=0x1ff
-and r0, r3, r0, lsr #13
+and r0, r3, r0, lsr #13   //r0 = no. of sets - 1
 
 
-	mov r1, #0
+	mov r1, #0                //r1 = way counter way_loop
 way_loop:
-	mov r3, #0
+	mov r3, #0                //r3 = set counter set_loop
 set_loop:
-	mov r2, r1, lsl #30
-	orr r2, r3, lsl #5
-	mcr p15, 0, r2, c7, c6, 2
-	add r3, r3, #1
-	cmp r0, r3
-	bgt set_loop
-	add r1, r1, #1
-	cmp r1, #4
-	bne way_loop
+	mov r2, r1, lsl #30        
+	orr r2, r3, lsl #5        //r2 = set/way cache operation format
+	mcr p15, 0, r2, c7, c6, 2 //Invalidate the line described by r2
+	add r3, r3, #1            //Increment set counter
+	cmp r0, r3                //Last set reached yet?
+	bgt set_loop              //If not, iterate set_loop
+	add r1, r1, #1            //else next
+	cmp r1, #4                //Last way reached yet?
+	bne way_loop              //If not, iterate way_loop
 
 
-//Invalidate TLB
+/* Invalidate TLB */
 mcr p15, 0, r1, c8, c7, 0
 
-//Branch Prediction Enable
+/* Branch Prediction Enable */
 mov r1, #0
-mrc p15, 0, r1, c1, c0, 0
-orr r1, r1, #(0x1 << 11)
-mcr p15, 0, r1, c1, c0, 0
+mrc p15, 0, r1, c1, c0, 0 //Read Control Register configuration data
+orr r1, r1, #(0x1 << 11)  //Global BP Enable bit
+mcr p15, 0, r1, c1, c0, 0 //Write Control Register configuration data
 
-//Create Translation Table
-//Enable D-side Prefetch
-mrc p15, 0, r1, c1, c0, 1
-orr r1, r1, #(0x1 << 2)
-mcr p15, 0, r1, c1, c0, 1
+/* Enable D-side Prefetch */
+mrc p15, 0, r1, c1, c0, 1 //Read Anxiliary Control Register
+orr r1, r1, #(0x1 << 2)   //Enable D-side prefetch
+mcr p15, 0, r1, c1, c0, 1 //Write Anxiliary Control Register
 dsb
 isb
  
-//Jump to mmuinit0 in mmu.c
+/* Jump to mmuinit0 in mmu.c */
 bl mmuinit0       
 
-//Initialize MMU
+/* Initialize MMU */
 mov r1, #0x0
-mcr p15, 0, r1, c2, c0, 2
-ldr r1, =0x4000
-mcr p15, 0, r1, c2, c0, 0
+mcr p15, 0, r1, c2, c0, 2 //Write Translation Table Base Control Register
+ldr r1, =0x4000           //0x4000 == ttb address
+mcr p15, 0, r1, c2, c0, 0 //Write Translation Table Base Register 0
 
-//Set domain access control register
-//ldr r1, =0x1
-//mcr p15, 0, r1, c3, c0, 0
+/* Set domain access control register */
+mrc p15, 0, r1, c3, c0, 0 //Read Domain Access Control Register
+//bic r1, r1, #0x3
+//orr r1, r1, #0x1
+ldr r1,=0xffffffff
+mcr p15, 0, r1, c3, c0, 0 //Write Domain Access Control Register
 
-//Enable MMU 
-mrc p15, 0, r1, c1, c0, 0
-orr r1, r1, #0x1
-orr r1, #0x00002000     //Vector table at high memory
-orr r1, #0x00000004     //Data Cache Enable
-orr r1, #0x00001000     //Instruction Cache Enable
-mcr p15, 0, r1, c1, c0, 0
+
+/* Enable MMU */
+mrc p15, 0, r1, c1, c0, 0 //Read Control Register configuration data
+orr r1, r1, #0x1          //Bit 0 is the MMU enable
+orr r1, #0x00002000       //Vector table at high memory
+orr r1, #0x00000004       //Data Cache Enable
+orr r1, #0x00001000       //Instruction Cache Enable
+mcr p15, 0, r1, c1, c0, 0 //Write Control Register configuration data
 
 // =========== END =========== //
        
