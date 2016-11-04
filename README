@@ -14,11 +14,9 @@ and also, synchronize.c/h are added to use the maintenance operations
 
 
 The following functions are not properly working in the current version:
-1. OkLoop()
-2. NotOkLoop()
-3. gpuputc()
-4. drawpixel()
-5. Builtin cache maintenance operations in entry.s such as flush_dcache_all()
+1. gpuputc()
+2. drawpixel()
+3. Builtin cache maintenance operations defined in entry.s such as flush_dcache_all()
 
 
 Any improvements or poiting out my initialization mistakes would be welcomed.

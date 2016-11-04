@@ -22,7 +22,7 @@ extern volatile uint *mailbuffer;
 
 void OkLoop()
 {
-   setgpiofunc(47, 1); // gpio 16, set as an output
+   setgpiofunc(16, 1); 
    while(1){
         setgpioval(47, 0);
         delay(1000000);
@@ -33,7 +33,7 @@ void OkLoop()
 
 void NotOkLoop()
 {
-   setgpiofunc(47, 1); // gpio 16, set as an output
+   setgpiofunc(16, 1); 
    while(1){
         setgpioval(47, 0);
         delay(100000);
@@ -52,7 +52,6 @@ void enableirqminiuart(void);
 
 int cmain()
 {
-
   mmuinit1();
   machinit();
   uartinit();
